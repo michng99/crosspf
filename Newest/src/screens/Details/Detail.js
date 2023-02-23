@@ -6,11 +6,32 @@ import {
   Dimensions,
   ScrollView,
 } from 'react-native';
-import React from 'react';
+import React, {useState, useContext, useEffect} from 'react';
+import {NewsContext} from '../../components/NewContextProvider/GetNewContext';
 
 var height = Dimensions.get('window').height;
-const Detail = () => {
-  return (
+
+const Detail = props => {
+  const {nagivation, route} = props;
+
+  const [name, setName] = useState('');
+
+  //truyen chi tiet bai viet theo id tu GetNewContext
+  const {id} = route?.params;
+  const {getNewDetail} = useContext(NewsContext);
+
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    const getData = async () => {
+      const result = await getNewDetail(id);
+      setData(result);
+    };
+    if (id) getData();
+    return () => {};
+  }, [id]);
+
+  return data ? (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.section}>
       <View style={styles.authInfo}>
         <Image source={require('../../../assets/images/Ellipse.png')} />
@@ -20,24 +41,18 @@ const Detail = () => {
         </View>
       </View>
       <Image
-        source={require('../../../assets/images/news.jpg')}
+        source={{uri: data?.image}}
         style={styles.newsimg}
         resizeMode="cover"
       />
       <Text style={styles.eu}>Europe</Text>
-      <Text style={styles.title}>
-        U.S. president Biden visits war-time Kyiv
-      </Text>
-      <Text style={styles.content}>
-        U.S. President Joe Biden made an unannounced visit to the Ukrainian
-        capital Kyiv on Monday, days before the first anniversary of Russia's
-        attacks in Ukraine in 2022. An air raid sirens blared across the
-        Ukrainian capital as Biden visited Kyiv but there were no reports of
-        Russian missile or air strikes. Biden said Washington would stand with
-        Ukraine as long as it takes. "Your visit is an extremely important sign
-        of support for all Ukrainians," Zelenskiy said.
-      </Text>
+      <Text style={styles.title}>{data?.title}</Text>
+      <Text style={styles.content}>{data?.content}</Text>
     </ScrollView>
+  ) : (
+    <View>
+      <Text style={{fontSize: 40}}>Data is loading</Text>
+    </View>
   );
 };
 

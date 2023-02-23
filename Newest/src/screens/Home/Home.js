@@ -1,40 +1,53 @@
-import {View, Text, StyleSheet, Image, FlatList} from 'react-native';
-import React from 'react';
+import {View, Text, StyleSheet, Image, FlatList, Pressable} from 'react-native';
+import React, {useState, useContext, useEffect} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
+import {NewsContext} from '../../components/NewContextProvider/GetNewContext';
 
-const Home = () => {
+const Home = props => {
+  const {navigation} = props;
+  //truyen danh sach bai viet tu GetNewContext
+  const {getNews} = useContext(NewsContext);
+  const [name, setName] = useState(''); //khoi tao state name
+  const [data, setData] = useState([]); //khoi tao ds bai viet
+
+  //Get Data To Show On FlatList
+  useEffect(() => {
+    const getData = async () => {
+      const result = await getNews();
+      setData(result);
+    };
+    getData();
+    return () => {};
+  }, []);
+
   //renderItem = adapter
   const renderItem = props => {
     const {item} = props;
+    const {title, image, createdAt, _id} = item;
+
+    const timeCount = value => {
+      const date = new Date(value);
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+      // console.log('date is ' + value);
+      return `${year}/${month}/${day}`;
+    };
+
     return (
-      <View style={styles.cardv}>
-        <Image
-          style={styles.imgv}
-          source={require('../../../assets/images/Hotpot.png')}
-        />
+      <Pressable
+        style={styles.cardv}
+        onPress={() => navigation.navigate('Detail', {id: _id})}>
+        <Image source={{uri: image}} style={styles.imgv} />
         <View style={styles.contentv}>
           <Text style={styles.topicv}>Europe</Text>
-          <Text style={styles.titlev}>
-            Ông Zelensky tuyên bố Nga tổn thất nặng ở miền đông Ukraine
-          </Text>
+          <Text style={styles.topicv}>{timeCount(createdAt)}</Text>
+          <Text style={styles.titlev}>{title}</Text>
           {/* <Text>VNExpress</Text> */}
         </View>
-      </View>
+      </Pressable>
     );
   };
-
-  const data = [
-    {id: '1', title: 'Item 1'},
-    {id: '2', title: 'Item 2'},
-    {id: '3', title: 'Item 3'},
-    {id: '4', title: 'Item 4'},
-    {id: '5', title: 'Item 5'},
-    {id: '6', title: 'Item 6'},
-    {id: '7', title: 'Item 7'},
-    {id: '8', title: 'Item 8'},
-    {id: '9', title: 'Item 9'},
-    {id: '10', title: 'Item 10'},
-  ];
 
   return (
     <View style={styles.container}>
@@ -42,8 +55,9 @@ const Home = () => {
       <FlatList
         data={data}
         renderItem={renderItem}
-        keyExtractor={Math.random}
+        keyExtractor={item => item._id}
         showsVerticalScrollIndicator={false}
+        horizontal={false}
       />
     </View>
   );

@@ -6,16 +6,35 @@ import {
   Pressable,
   Image,
   Dimensions,
+  ToastAndroid,
 } from 'react-native';
-import React from 'react';
+import React, {useState, useContext} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import CustomButtonSocials from '../../components/CustomButtonSocials/CustomButtonSocials';
+import {UserContext} from '../../components/UserContextValidation/UserContextValidation';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 var height = Dimensions.get('window').height;
 
 const RegisterScreen = props => {
   const {navigation} = props;
+  const [toggleCheckBox, setToggleCheckBox] = useState(false);
+  const {register} = useContext(UserContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleRegister = async () => {
+    const result = await register(email, password);
+    if (result) {
+      ToastAndroid.show('Register successful', ToastAndroid.LONG);
+      navigation.navigate('LoginScreen');
+    } else {
+      ToastAndroid.show('Register failed', ToastAndroid.LONG);
+      setEmail('');
+      setPassword('');
+    }
+  };
   return (
     <LinearGradient
       colors={['#FFFDF1', '#F2FDF4', '#005AA7']}
@@ -26,7 +45,13 @@ const RegisterScreen = props => {
       <Text style={styles.usnametxt}>
         Username <Text style={{color: '#b20a2c'}}>*</Text>
       </Text>
-      <TextInput style={styles.textinput} />
+      <TextInput
+        style={styles.textinput}
+        value={email}
+        onChangeText={setEmail}
+        placeholderTextColor={Colors.lighterGrey}
+        placeholder="Enter your email"
+      />
       <Text style={styles.passwordtxt}>
         Password <Text style={{color: '#b20a2c'}}>*</Text>
       </Text>
@@ -40,9 +65,16 @@ const RegisterScreen = props => {
             color: '#000046',
           }}
         />
-        <TextInput style={styles.textinput} secureTextEntry />
+        <TextInput
+          value={password}
+          onChangeText={setPassword}
+          style={styles.textinput}
+          placeholderTextColor={Colors.lighterGrey}
+          placeholder="Enter your password"
+          secureTextEntry
+        />
       </View>
-      <Pressable style={styles.btlogin}>
+      <Pressable onPress={handleRegister} style={styles.btlogin}>
         <Text style={styles.textlogin}>Sign Up</Text>
       </Pressable>
       <Text style={{marginTop: 16, textAlign: 'center', color: '#000146'}}>

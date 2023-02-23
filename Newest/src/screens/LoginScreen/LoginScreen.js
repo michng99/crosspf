@@ -6,16 +6,37 @@ import {
   Pressable,
   Image,
   Dimensions,
+  ToastAndroid,
+  Alert,
 } from 'react-native';
-import React from 'react';
+import React, {useState, useContext} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import CustomButtonSocials from '../../components/CustomButtonSocials/CustomButtonSocials';
+import {UserContext} from '../../components/UserContextValidation/UserContextValidation';
+import UserNavigation from '../../components/UserNavigation/UserNavigation';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+// import RegisterScreen from '../../screens/RegisterScreen/RegisterScreen';
 
 var height = Dimensions.get('window').height;
 
 const LoginScreen = props => {
   const {navigation} = props;
+  const [toggleCheckBox, setToggleCheckBox] = useState(false);
+
+  const {login} = useContext(UserContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    const result = await login(email, password);
+    if (!result) {
+      ToastAndroid.show('Login failed', ToastAndroid.LONG);
+      setEmail('');
+      setPassword('');
+    }
+  };
+
   return (
     <LinearGradient
       colors={['#FFFDF1', '#F2FDF4', '#005AA7']}
@@ -26,7 +47,13 @@ const LoginScreen = props => {
       <Text style={styles.usnametxt}>
         Username <Text style={{color: '#b20a2c'}}>*</Text>
       </Text>
-      <TextInput style={styles.textinput} />
+      <TextInput
+        value={email}
+        onChangeText={setEmail}
+        style={styles.textinput}
+        placeholderTextColor={Colors.lighterGrey}
+        placeholder="Enter your email"
+      />
       <Text style={styles.passwordtxt}>
         Password <Text style={{color: '#b20a2c'}}>*</Text>
       </Text>
@@ -40,7 +67,14 @@ const LoginScreen = props => {
             color: '#000046',
           }}
         />
-        <TextInput style={styles.textinput} secureTextEntry />
+        <TextInput
+          value={password}
+          onChangeText={setPassword}
+          style={styles.textinput}
+          placeholderTextColor={Colors.lighterGrey}
+          placeholder="Enter your password"
+          secureTextEntry
+        />
       </View>
       <View style={styles.view3}>
         <View style={styles.viewrb}>
@@ -53,7 +87,7 @@ const LoginScreen = props => {
         </View>
         <Text style={{color: '#000046'}}>Forgot Password</Text>
       </View>
-      <Pressable style={styles.btlogin}>
+      <Pressable onPress={handleLogin} style={styles.btlogin}>
         <Text style={styles.textlogin}>Login</Text>
       </Pressable>
       <Text style={styles.textcont}>or continue with</Text>
